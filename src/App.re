@@ -22,7 +22,7 @@ let component = ReasonReact.reducerComponent("App");
 
 module Item = {
   let component = ReasonReact.statelessComponent("Item");
-  let make = (~title, ~identity=?, ~isCompleted, _children) => {
+  let make = (~title, ~identity=?, ~isCompleted=false, _children) => {
     ...component,
     render: _self =>
       <div>
@@ -35,6 +35,7 @@ module Item = {
             }
           }
           checked=isCompleted
+          readOnly=true
         />
         <label
           htmlFor={
