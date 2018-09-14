@@ -20,24 +20,47 @@ type action =
 
 let component = ReasonReact.reducerComponent("App");
 
+module Item = {
+  let component = ReasonReact.statelessComponent("Item");
+  let make = (~title, ~identity=?, ~isCompleted, _children) => {
+    ...component,
+    render: _self =>
+      <div>
+        <input
+          type_="checkbox"
+          id={
+            switch (identity) {
+            | None => title
+            | Some(identity) => identity
+            }
+          }
+          checked=isCompleted
+        />
+        <label
+          htmlFor={
+            switch (identity) {
+            | None => title
+            | Some(identity) => identity
+            }
+          }>
+          {ReasonReact.string(title)}
+        </label>
+      </div>,
+  };
+};
+
 let initialItems: list(item) = [
   {title: "first task", completed: true},
   {title: "second task", completed: false},
 ];
 
 let make = _children => {
-  let renderItems = state =>
+  let renderItems = items =>
     ReasonReact.array(
       Array.of_list(
         List.map(
-          item =>
-            <div>
-              <input type_="checkbox" id={item.title} />
-              <label htmlFor={item.title}>
-                {ReasonReact.string(item.title)}
-              </label>
-            </div>,
-          state.items,
+          item => <Item title={item.title} isCompleted={item.completed} />,
+          items,
         ),
       ),
     );
@@ -72,7 +95,7 @@ let make = _children => {
               };
             }
           }>
-          {renderItems(state)}
+          {renderItems(state.items)}
           <input
             name="task"
             type_="text"
