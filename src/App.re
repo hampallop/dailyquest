@@ -6,48 +6,16 @@ type item = {
 };
 
 type state = {
-  foo: string,
   items: list(item),
   task: string,
 };
 
 type action =
-  | Click(int)
-  | Submit(item)
-  | HandleTaskInput(string);
+  | Toggle(int)
+  | HandleTaskInput(string)
+  | AddToDo(item);
 
 let component = ReasonReact.reducerComponent("App");
-
-module Item = {
-  let component = ReasonReact.statelessComponent("Item");
-  let make = (~title, ~onClick, ~identity=?, ~isCompleted=false, _children) => {
-    ...component,
-    render: _self =>
-      <div>
-        <input
-          type_="checkbox"
-          id={
-            switch (identity) {
-            | None => title
-            | Some(identity) => identity
-            }
-          }
-          onChange=onClick
-          checked=isCompleted
-          readOnly=true
-        />
-        <label
-          htmlFor={
-            switch (identity) {
-            | None => title
-            | Some(identity) => identity
-            }
-          }>
-          {ReasonReact.string(title)}
-        </label>
-      </div>,
-  };
-};
 
 let initialItems: list(item) = [
   {title: "first task", completed: true},
@@ -56,48 +24,38 @@ let initialItems: list(item) = [
 
 let make = _children => {
   let renderItems = (items, send) =>
-    ReasonReact.array(
-      Array.of_list(
-        List.mapi(
-          (index, item) =>
-            <Item
-              key={item.title}
-              onClick={_ => send(Click(index))}
-              title={item.title}
-              isCompleted={item.completed}
-            />,
-          items,
-        ),
-      ),
-    );
-
+    items
+    |> List.mapi((index, item) =>
+         <TodoItem
+           key={item.title}
+           onClick={_ => send(Toggle(index))}
+           title={item.title}
+           isCompleted={item.completed}
+         />
+       )
+    |> Array.of_list
+    |> ReasonReact.array;
   {
     ...component,
-    initialState: () => {foo: "hello", items: initialItems, task: ""},
+    initialState: () => {items: initialItems, task: ""},
     reducer: (action, state) =>
       switch (action) {
-      | Click(index) =>
+      | Toggle(index) =>
         ReasonReact.Update({
           ...state,
           items:
-            List.mapi(
-              (itemIndex, item) =>
-                itemIndex == index ?
-                  {...item, completed: !item.completed} : item,
-              state.items,
-            ),
+            state.items
+            |> List.mapi((itemIndex, item) =>
+                 itemIndex == index ?
+                   {...item, completed: !item.completed} : item
+               ),
         })
       | HandleTaskInput(input) => ReasonReact.Update({...state, task: input})
-      | Submit(task) =>
-        ReasonReact.Update({
-          ...state,
-          items: [task, ...state.items],
-          task: "",
-        })
+      | AddToDo(task) =>
+        ReasonReact.Update({items: [task, ...state.items], task: ""})
       },
     render: ({state, send}) =>
       <div className="App">
-        {ReasonReact.string(state.foo)}
         <form
           onSubmit={
             event => {
@@ -106,7 +64,7 @@ let make = _children => {
               let payload = {title: value, completed: false};
               switch (value) {
               | "" => Js.log("Empty")
-              | _ => send(Submit(payload))
+              | _ => send(AddToDo(payload))
               };
             }
           }>
