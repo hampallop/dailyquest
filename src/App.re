@@ -60,7 +60,12 @@ let make = _children => {
     ReasonReact.array(
       Array.of_list(
         List.map(
-          item => <Item title={item.title} isCompleted={item.completed} />,
+          item =>
+            <Item
+              key={item.title}
+              title={item.title}
+              isCompleted={item.completed}
+            />,
           items,
         ),
       ),
