@@ -1,7 +1,5 @@
 [%bs.raw {|require('./App.css')|}];
 
-[@bs.module] external logo: string = "./logo.svg";
-
 type item = {
   title: string,
   completed: bool,
@@ -14,7 +12,7 @@ type state = {
 };
 
 type action =
-  | Click
+  | Click(int)
   | Submit(item)
   | HandleTaskInput(string);
 
@@ -22,7 +20,7 @@ let component = ReasonReact.reducerComponent("App");
 
 module Item = {
   let component = ReasonReact.statelessComponent("Item");
-  let make = (~title, ~identity=?, ~isCompleted=false, _children) => {
+  let make = (~title, ~onClick, ~identity=?, ~isCompleted=false, _children) => {
     ...component,
     render: _self =>
       <div>
@@ -34,6 +32,7 @@ module Item = {
             | Some(identity) => identity
             }
           }
+          onChange=onClick
           checked=isCompleted
           readOnly=true
         />
@@ -56,13 +55,14 @@ let initialItems: list(item) = [
 ];
 
 let make = _children => {
-  let renderItems = items =>
+  let renderItems = (items, send) =>
     ReasonReact.array(
       Array.of_list(
-        List.map(
-          item =>
+        List.mapi(
+          (index, item) =>
             <Item
               key={item.title}
+              onClick={_ => send(Click(index))}
               title={item.title}
               isCompleted={item.completed}
             />,
@@ -76,24 +76,33 @@ let make = _children => {
     initialState: () => {foo: "hello", items: initialItems, task: ""},
     reducer: (action, state) =>
       switch (action) {
-      | Click => ReasonReact.Update({...state, foo: "world"})
+      | Click(index) =>
+        ReasonReact.Update({
+          ...state,
+          items:
+            List.mapi(
+              (itemIndex, item) =>
+                itemIndex == index ?
+                  {...item, completed: !item.completed} : item,
+              state.items,
+            ),
+        })
+      | HandleTaskInput(input) => ReasonReact.Update({...state, task: input})
       | Submit(task) =>
         ReasonReact.Update({
           ...state,
           items: [task, ...state.items],
           task: "",
         })
-      | HandleTaskInput(input) => ReasonReact.Update({...state, task: input})
       },
     render: ({state, send}) =>
       <div className="App">
         {ReasonReact.string(state.foo)}
         <form
           onSubmit={
-            e => {
-              ReactEvent.Form.preventDefault(e);
-              Js.log(ReactEvent.Form.target(e)##task##value);
-              let value = ReactEvent.Form.target(e)##task##value;
+            event => {
+              ReactEvent.Form.preventDefault(event);
+              let value = ReactEvent.Form.target(event)##task##value;
               let payload = {title: value, completed: false};
               switch (value) {
               | "" => Js.log("Empty")
@@ -101,7 +110,7 @@ let make = _children => {
               };
             }
           }>
-          {renderItems(state.items)}
+          {renderItems(state.items, send)}
           <input
             name="task"
             type_="text"
@@ -111,9 +120,7 @@ let make = _children => {
                 send(HandleTaskInput(ReactEvent.Form.target(event)##value))
             }
           />
-          <button onClick={_event => send(Click)}>
-            {ReasonReact.string("click me")}
-          </button>
+          <button> {ReasonReact.string("click me")} </button>
         </form>
       </div>,
   };
