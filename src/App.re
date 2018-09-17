@@ -22,6 +22,19 @@ let initialItems: list(item) = [
   {title: "second task", completed: false},
 ];
 
+module Styles = {
+  open Css;
+  let input =
+    style([
+      paddingLeft(px(20)),
+      padding(px(10)),
+      fontSize(px(15)),
+      width(px(200)),
+      borderRadius(px(20)),
+      border(px(2), solid, hex("6699CC")),
+    ]);
+};
+
 let make = _children => {
   let renderItems = (items, send) =>
     items
@@ -70,6 +83,7 @@ let make = _children => {
           }>
           {renderItems(state.items, send)}
           <input
+            className=Styles.input
             name="task"
             type_="text"
             value={state.task}
@@ -78,7 +92,6 @@ let make = _children => {
                 send(HandleTaskInput(ReactEvent.Form.target(event)##value))
             }
           />
-          <button> {ReasonReact.string("click me")} </button>
         </form>
       </div>,
   };
