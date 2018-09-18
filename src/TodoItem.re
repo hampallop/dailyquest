@@ -8,7 +8,7 @@ module Styles = {
       borderRadius(px(5)),
       textAlign(`left),
       display(`flex),
-      margin(px(10)),
+      margin(px(5)),
     ]);
   let showInputBox = isCompleted =>
     style([

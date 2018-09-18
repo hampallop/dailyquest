@@ -24,15 +24,21 @@ let initialItems: list(item) = [
 
 module Styles = {
   open Css;
+  let inputFocus = Css.focus([outlineStyle(none)]);
   let input =
     style([
+      focus([inputFocus]),
       paddingLeft(px(20)),
       padding(px(10)),
       fontSize(px(15)),
-      width(px(200)),
+      width(px(300)),
       borderRadius(px(20)),
       border(px(2), solid, hex("6699CC")),
+      marginTop(px(10)),
+      fontFamily("menlo"),
     ]);
+  let form =
+    style([display(`flex), flexDirection(`column), alignItems(`center)]);
 };
 
 let make = _children => {
@@ -70,6 +76,7 @@ let make = _children => {
     render: ({state, send}) =>
       <div className="App">
         <form
+          className=Styles.form
           onSubmit={
             event => {
               ReactEvent.Form.preventDefault(event);
@@ -86,6 +93,8 @@ let make = _children => {
             className=Styles.input
             name="task"
             type_="text"
+            autoComplete="off"
+            placeholder="input here ..."
             value={state.task}
             onChange={
               event =>
