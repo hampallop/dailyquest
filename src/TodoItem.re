@@ -20,40 +20,39 @@ module Styles = {
       cursor(`pointer),
       backgroundColor(isCompleted ? white : transparent),
     ]);
+  let inputCheckbox = style([display(`none)]);
   let label =
     style([
       marginLeft(px(20)),
       color(white),
       fontFamily("menlo"),
       marginTop(px(12)),
+      cursor(`pointer),
+      userSelect(`none),
     ]);
 };
 
 let component = ReasonReact.statelessComponent("TodoItem");
 let make = (~title, ~onClick, ~identity=?, ~isCompleted=false, _children) => {
-  ...component,
-  render: _self =>
-    <div className=Styles.wrapperBox>
-      <div
-        className={Styles.showInputBox(isCompleted)}
-        id={
-          switch (identity) {
-          | None => title
-          | Some(identity) => identity
-          }
-        }
-        onClick
-        readOnly=true
-      />
-      <label
-        className=Styles.label
-        htmlFor={
-          switch (identity) {
-          | None => title
-          | Some(identity) => identity
-          }
-        }>
-        {ReasonReact.string(title)}
-      </label>
-    </div>,
+  let id =
+    switch (identity) {
+    | None => title
+    | Some(identity) => identity
+    };
+  {
+    ...component,
+    render: _self =>
+      <div className=Styles.wrapperBox>
+        <input className=Styles.inputCheckbox type_="checkbox" onClick id />
+        <div
+          className={Styles.showInputBox(isCompleted)}
+          onClick
+          id
+          readOnly=true
+        />
+        <label className=Styles.label htmlFor=id>
+          {ReasonReact.string(title)}
+        </label>
+      </div>,
+  };
 };
