@@ -7,7 +7,8 @@ module Styles = {
       width(px(300)),
       borderRadius(px(5)),
       textAlign(`left),
-      display(`flex),
+      display(`grid),
+      gridTemplateColumns([auto, fr(1.0), auto]),
       margin(px(5)),
     ]);
   let showInputBox = isCompleted =>
@@ -30,10 +31,28 @@ module Styles = {
       cursor(`pointer),
       userSelect(`none),
     ]);
+  let barFirst =
+    style([
+      display(`block),
+      width(px(16)),
+      height(px(2)),
+      backgroundColor(hex("000")),
+      transforms([translateY(px(1)), rotate(deg(45))]),
+    ]);
+  let barSecond =
+    style([
+      display(`block),
+      width(px(16)),
+      height(px(2)),
+      backgroundColor(hex("000")),
+      transforms([translateY(px(-1)), rotate(deg(-45))]),
+    ]);
+  let closeButton = style([cursor(`pointer)]);
 };
 
 let component = ReasonReact.statelessComponent("TodoItem");
-let make = (~title, ~onClick, ~identity=?, ~isCompleted=false, _children) => {
+let make =
+    (~title, ~onClick, ~identity=?, ~isCompleted=false, ~onRemove, _children) => {
   let id =
     switch (identity) {
     | None => title
@@ -53,6 +72,10 @@ let make = (~title, ~onClick, ~identity=?, ~isCompleted=false, _children) => {
         <label className=Styles.label htmlFor=id>
           {ReasonReact.string(title)}
         </label>
+        <button onClick=onRemove type_="button" className=Styles.closeButton>
+          <span className=Styles.barFirst />
+          <span className=Styles.barSecond />
+        </button>
       </div>,
   };
 };

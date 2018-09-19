@@ -1,6 +1,7 @@
 [%bs.raw {|require('./App.css')|}];
 
 type item = {
+  id: float,
   title: string,
   completed: bool,
 };
@@ -13,13 +14,14 @@ type state = {
 type action =
   | Toggle(int)
   | HandleTaskInput(string)
-  | AddToDo(item);
+  | AddToDo(item)
+  | RemoveItem(float);
 
 let component = ReasonReact.reducerComponent("App");
 
 let initialItems: list(item) = [
-  {title: "first task", completed: true},
-  {title: "second task", completed: false},
+  {id: 1.0, title: "first task", completed: true},
+  {id: 2.0, title: "second task", completed: false},
 ];
 
 module Styles = {
@@ -48,6 +50,7 @@ let make = _children => {
          <TodoItem
            key={item.title}
            onClick={_ => send(Toggle(index))}
+           onRemove={_ => send(RemoveItem(item.id))}
            title={item.title}
            isCompleted={item.completed}
          />
@@ -72,6 +75,9 @@ let make = _children => {
       | HandleTaskInput(input) => ReasonReact.Update({...state, task: input})
       | AddToDo(task) =>
         ReasonReact.Update({items: [task, ...state.items], task: ""})
+      | RemoveItem(id) =>
+        let newItems = state.items |> List.filter(item => item.id != id);
+        ReasonReact.Update({...state, items: newItems});
       },
     render: ({state, send}) =>
       <div className="App">
@@ -81,7 +87,11 @@ let make = _children => {
             event => {
               ReactEvent.Form.preventDefault(event);
               let value = ReactEvent.Form.target(event)##task##value;
-              let payload = {title: value, completed: false};
+              let payload = {
+                id: Js.Date.now(),
+                title: value,
+                completed: false,
+              };
               switch (value) {
               | "" => Js.log("Empty")
               | _ => send(AddToDo(payload))
