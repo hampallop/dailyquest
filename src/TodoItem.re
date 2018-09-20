@@ -47,7 +47,12 @@ module Styles = {
       backgroundColor(hex("000")),
       transforms([translateY(px(-1)), rotate(deg(-45))]),
     ]);
-  let closeButton = style([cursor(`pointer)]);
+  let closeButton =
+    style([
+      cursor(`pointer),
+      backgroundColor(`transparent),
+      borderWidth(px(0)),
+    ]);
 };
 
 let component = ReasonReact.statelessComponent("TodoItem");
