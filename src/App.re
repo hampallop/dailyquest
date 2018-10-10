@@ -1,5 +1,3 @@
-[%bs.raw {|require('./App.css')|}];
-
 type item = {
   id: float,
   title: string,
@@ -80,7 +78,7 @@ let make = _children => {
         ReasonReact.Update({...state, items: newItems});
       },
     render: ({state, send}) =>
-      <div className="App">
+      <div>
         <form
           className=Styles.form
           onSubmit={
